@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Контакты</title>
+    <link rel="shortcut icon" href="../assets/img/title.png">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <nav class="header__nav">
+            <img src="../assets/img/logo.webp" alt="logo" class="header__img">
+            <ul class="header__list">
+                <li><a class="main__btn" href="../index.html">Домой</a></li>
+                <li><a class="main__btn" href="../sight/attraction.html">Достопримечательности</a></li>
+                <li><a class="main__btn" href="#">Контакты</a></li>
+            </ul>
+        </nav>
+        <div class="menu">
+            <input type="checkbox" id="burger-checkbox" class="burger-checkbox">
+            <label for="burger-checkbox" class="burger"></label>
+            <ul class="menu-list">
+                <li><a class="menu-item" href="../index.html">Домой</a></li>
+                <li><a class="menu-item" href="../sight/attraction.html">Достопримечательности</a></li>
+                <li><a class="menu-item" href="#">Контакты</a></li>
+            </ul>
+        </div>
+    </header>
+    <section class="map">
+        <h2 class="populyar__title">Карта Города</h2>
+        <div>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d146572.12996800884!2d82.6376118173874!3d54.96977535273135!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x42dfe5e190cc4d97%3A0x9b3a0673e1d3e985!2z0J3QvtCy0L7RgdC40LHQuNGA0YHQuiwg0J3QvtCy0L7RgdC40LHQuNGA0YHQutCw0Y8g0L7QsdC7Lg!5e0!3m2!1sru!2sru!4v1728895093193!5m2!1sru!2sru" width="1700" height="900" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </section>
+    <section class="about">
+        <div class="about__main">
+            <div>
+                <img src="./assets/img/smartphone.png" alt="" width="100px" height="100px">
+                <div>
+                    <p>+7 (123) 456 78 90</p>
+                    <p>+7 (098) 765 43 21</p>
+                </div>
+            </div>
+        </div>
+        <div class="about__main">
+            <div>
+                <img src="./assets/img/home.png" alt="" width="100px" height="100px">
+                <div>
+                    <p>Новосибирск, Красный пр-т., 39</p>
+                </div>
+            </div>
+        </div>
+        <div class="about__main">
+            <div>
+                <img src="./assets/img/message.png" alt="" width="100px" height="100px">
+                <div class="about__hr"></div>
+                <div>
+                    <p>info@email.com</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="container">
+        <button class="floating-btn">Связаться с нами</button>
+        <div class="social-panel-container">
+            <div class="social-panel">
+                <button class="close-btn">&#x2715;</button>
+                <form class="obratnuj__zvonok" id="Form" method='post'>
+                    <div class ="form__zvonok"> 
+                        <div>
+                            <label>Имя<span>*</span></label>
+                            <input type ='text' name ='username' id="name" required></div>
+                        <div>
+                            <label>Номер телефона<span>*</span></label>
+                            <input type="number" name="quantity" id="phone" placeholder="+123456789"/>
+                        <div>
+                            <label>Сообщение</label>
+                            <input type='text' id="text" name='question'>
+                        </div>
+                        <input class="send__mail" type='submit' value='Послать заявку'>
+                    </div>
+                </form>
+            </div>
+        </div>        
+    </section>
+    <footer class="footer">
+        <div>
+            <ul>
+                <li class="footer__title1">Наши Контакты</li>
+                <li class="footer__text"><img src="../assets/img/phone.png" alt="call" width="30px" height="30px"><p>+7 (123) 456 78 90</p></li>
+                <li class="footer__text"><img src="../assets/img/pismo.png" alt="email" width="30px" height="30px"><p>info@email.com</p></li>
+                <li class="footer__text"><img src="../assets/img/cart.png" alt="market" width="30px" height="30px"><p>Г.Новосибирск ул,Пушкина<br> дом Калатушкина 1А</p></li>
+            </ul>
+            <ul class="footer__title2">
+                <li class="footer__title"><a href="https://be30nch1k.github.io/snake.github.io/">Популярные новости</a></li>
+                <li class="footer__text"><a class="footer__nav footer__text1" href="https://iz.ru/1757300/2024-09-11/zammera-sergunina-rasskazala-o-samykh-populiarnykh-ekskursiiakh-na-vdnkh">Заммэра Сергунина рассказала о самых<br> популярных экскурсиях на ВДНХ</a></li>
+                <li class="footer__text"><a class="footer__nav footer__text1" href="https://iz.ru/1767613/2024-10-01/moskvichei-i-gostei-goroda-priglasili-na-novyi-sezon-ekskursii-otkroimosprom">Москвичей и гостей города пригласили на новый<br> сезон экскурсий «Открой#Моспром»</a></li>
+            </ul>
+            <ul class="footer__title3">
+                <li class="footer__title">Быстрые ссылки</li>
+                <li class="footer__nav"><a class="footer__nav" href="../index.html">Домой</a></li>
+                <li class="footer__nav"><a class="footer__nav" href="../sight/attraction.html">Достопримечательности</a></li>
+                <li class="footer__nav"><a class="footer__nav" href="#">Контакты</a></li>
+            </ul>
+        </div>
+    </footer>
+    <script src="./assets/JS/script.js"></script>
+</body>
+</html>

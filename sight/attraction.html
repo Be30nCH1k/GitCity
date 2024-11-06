@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Достопримечательности</title>
+    <link rel="shortcut icon" href="../assets/img/title.png">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <section>
+        <header class="header">
+            <nav class="header__nav">
+                <img src="../assets/img/logo.webp" alt="logo" class="header__img">
+                <ul class="header__list">
+                    <li><a class="main__btn" href="../index.html">Домой</a></li>
+                    <li><a class="main__btn" href="#">Достопримечательности</a></li>
+                    <li><a class="main__btn" href="../contact/contact.html">Контакты</a></li>
+                </ul>
+            </nav>
+            <div class="menu">
+                <input type="checkbox" id="burger-checkbox" class="burger-checkbox">
+                <label for="burger-checkbox" class="burger"></label>
+                <ul class="menu-list">
+                    <li><a class="menu-item" href="../index.html">Домой</a></li>
+                    <li><a class="menu-item" href="#">Достопримечательности</a></li>
+                    <li><a class="menu-item" href="../contact/contact.html">Контакты</a></li>
+                </ul>
+            </div>
+        </header>
+        <div class="main__section">
+            <div class="header__title">
+                <h1>Достопримечательности</h1>
+            </div>
+            <form class="header__search"> 
+                <input class="header__search-poisk" id="searchInput" type="search" name="text" class="search" placeholder="Что вы хотите найти?">
+            </form>
+        </div>
+    </section>
+    <section class="info" id="infoSection">
+        <h2 class="populyar__title">Популярные Достопримечательности Городов</h2>
+        <i class="fa-solid fa-angle-right"></i>
+        <div class="info__main" data-title="Драм Театр В Томске">
+            <img class="info__img" src="../assets/img/teatr.png" alt="teatr" width="700px" height="500px">
+            <div class="info__box">
+                <div class="info__title">Драм Театр В Томске</div>
+                <p class="info__text">Томский областной театр драмы - один из старейших в Сибири: первое театральное здание было построено в 1850 году. Деятельность томской драмы неразрывно связана с жизнью и развитием города - известного в стране вузовского и культурного центра.</p>
+                <div class="info__mini-box">
+                    <div class="info__mini-text">
+                        <p class="info__text">Адрес: г.Томск,<br> ул. Ленина 17</p>
+                        <p class="info__text">Открыт с 12:00 - 20:00</p>
+                    </div>
+                    <button class="info__btn"><a href="https://www.tomskdrama.ru/">Купить билеты</a></button>
+                </div>
+            </div>  
+        </div>
+        <div class="info__main" data-title="Парк Чудес Галилео В Новосибирске">
+            <img class="info__img" src="../assets/img/galileo.jpg" alt="galileo" width="700px" height="500px">
+            <div class="info__box">
+                <div class="info__title">Парк Чудес Галилео В Новосибирске</div>
+                <p class="info__text">"Парк чудес Галилео" в Новосибирске - это удивительный интерактивный музей, в котором представлены уникальные экспонаты и конструкции, невероятные иллюзии и огромный зеркальный лабиринт. Работа всех экспонатов основана на законах физики, математики, объяснении как устроен окружающий мир и демонстрации особенностей человеческого организма.</p>
+                <div class="info__mini-box">
+                    <div class="info__mini-text">
+                        <p class="info__text">Адрес: г.Новосибирск,<br> ул. Фрунзе 11А</p>
+                        <p class="info__text">Открыт с 8:00 - 18:00</p>
+                    </div>
+                    <button class="info__btn"><a href="https://nsk.galileopark.ru/price/">Купить билеты</a></button>
+                </div>
+            </div> 
+        </div>
+        <div class="info__main" data-title="Кемеровский областной театр драмы имени А. В. Луначарского В Кемерово">
+            <img class="info__img" src="../assets/img/teatr2.jpg" alt="teatr_kemerovo" width="700px" height="500px">
+            <div class="info__box">
+                <div class="info__title">Кемеровский областной театр драмы имени А. В. Луначарского В Кемерово</div>
+                <p class="info__text">История Кемеровского областного театра драмы началась 1 ноября 1934 года. Тогда ещё Государственный театр драмы «Культармеец Кузбасса» открыл первый театральный сезон спектаклем «Гибель эскадры» по пьесе Александра Корнейчука в постановке Алексея Ларионова</p>
+                <div class="info__mini-box">
+                    <div class="info__mini-text">
+                        <p class="info__text">Адрес: г.Кемерова,<br> ул. Павлова 121</p>
+                        <p class="info__text">Открыт с 14:00 - 18:00</p>
+                    </div>
+                    <button class="info__btn"><a href="http://www.kemdrama.ru/index.php?option=com_content&view=article&id=234&Itemid=128">Купить билеты</a></button>
+                </div>
+            </div>  
+        </div>
+        <div class="info__main" data-title="Музей мировой погребальной культуры В Новосибирске">
+            <img class="info__img" src="./assets/img/musei.jpg" alt="musei" width="700px" height="500px">
+            <div class="info__box">
+                <div class="info__title">Музей мировой погребальной культуры В Новосибирске</div>
+                <p class="info__text">Музей мировой погребальной культуры — новосибирский музей, посвящённый похоронным традициям различных народов. Является единственным в России музеем данной направленности. Музей расположен в Парке памяти Новосибирского крематория</p>
+                <div class="info__mini-box">
+                    <div class="info__mini-text">
+                        <p class="info__text">Адрес: г.Новосибирск,<br> ул. Кашелева 1</p>
+                        <p class="info__text">Открыт с 9:00 - 23:00</p>
+                    </div>
+                    <button class="info__btn"><a href="https://musei-smerti.ru/kassyi-po-onlayn-prodazhe-biletov/">Купить билеты</a></button>
+                </div>
+            </div> 
+        </div>
+        <div class="info__main" data-title="Зоопарк В Новосибирске">
+            <img class="info__img" src="./assets/img/zoo.jpg" alt="zoo" width="700px" height="500px">
+            <div class="info__box">
+                <div class="info__title">Зоопарк В Новосибирске</div>
+                <p class="info__text">Новосибирский зоопарк имени Ростислава Александровича Шило — один из крупнейших зоопарков России. Занимает площадь 65 га, в нём содержится около 12 000 особей 790 видов. Более 350 видов занесены в Международную красную книгу. Около 180 видов внесено в Красную книгу России и Региональные Красные Книги.</p>
+                <div class="info__mini-box">
+                    <div class="info__mini-text">
+                        <p class="info__text">Адрес: г.Новосибирск,<br> ул. Военторговская, 4/16</p>
+                        <p class="info__text">Открыт: 12:00 – 19:00</p>
+                    </div>
+                    <button class="info__btn"><a href="https://zoonovosib.ru/">Купить билеты</a></button>
+                </div>
+            </div> 
+        </div>
+    </section>
+    <footer class="footer">
+        <div>
+            <ul>
+                <li class="footer__title1">Наши Контакты</li>
+                <li class="footer__text"><img src="../assets/img/phone.png" alt="call" width="30px" height="30px"><p>+7 (123) 456 78 90</p></li>
+                <li class="footer__text"><img src="../assets/img/pismo.png" alt="email" width="30px" height="30px"><p>info@email.com</p></li>
+                <li class="footer__text"><img src="../assets/img/cart.png" alt="market" width="30px" height="30px"><p>Г.Новосибирск ул,Пушкина<br> дом Калатушкина 1А</p></li>
+            </ul>
+            <ul class="footer__title2">
+                <li class="footer__title"><a href="https://be30nch1k.github.io/snake.github.io/">Популярные новости</a></li>
+                <li class="footer__text"><a class="footer__nav footer__text1" href="https://iz.ru/1757300/2024-09-11/zammera-sergunina-rasskazala-o-samykh-populiarnykh-ekskursiiakh-na-vdnkh">Заммэра Сергунина рассказала о самых<br> популярных экскурсиях на ВДНХ</a></li>
+                <li class="footer__text"><a class="footer__nav footer__text1" href="https://iz.ru/1767613/2024-10-01/moskvichei-i-gostei-goroda-priglasili-na-novyi-sezon-ekskursii-otkroimosprom">Москвичей и гостей города пригласили на новый<br> сезон экскурсий «Открой#Моспром»</a></li>
+            </ul>
+            <ul class="footer__title3">
+                <li class="footer__title">Быстрые ссылки</li>
+                <li class="footer__nav foo"><a class="footer__nav" href="../index.html">Домой</a></li>
+                <li class="footer__nav"><a class="footer__nav" href="#">Достопримечательности</a></li>
+                <li class="footer__nav"><a class="footer__nav" href="../contact/contact.html">Контакты</a></li>
+            </ul>
+        </div>
+    </footer>
+    <script src="./assets/JS/script.js"></script>
+</body>
+</html>
