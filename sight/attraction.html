@@ -40,9 +40,12 @@
             </form>
         </div>
     </section>
-    <section class="info" id="infoSection">
+    <section class="info" id="infoSection">          
         <h2 class="populyar__title">Популярные Достопримечательности Городов</h2>
-        <button id="sortName">Сортировать по Алфавиту</button>      
+        <div>
+            <button id="sortName">Сортировать по Алфавиту</button>
+            <select id="categoryFilter"></select>
+        </div>      
         <div id="loader" class="loader" style="display: none;">Загрузка</div>
         <div id="data-list"></div>
         <div id="pagination"></div>
