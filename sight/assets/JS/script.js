@@ -5,7 +5,7 @@ const categoryFilter = document.getElementById('categoryFilter');
 const sortName = document.getElementById("sortName");
 const closeBtn = document.querySelector('.close-btn');
 const socialPanelContainer = document.querySelector('.social-panel-container');
-const modalSocial = document.querySelector('.obratnuj__zvonok');
+const modalSocial = document.querySelector('.main__modal');
 
 const itemOnPage = 10;
 let currentPage = 1;
@@ -29,14 +29,6 @@ addEventListener('load', async () => {
     hideLoader();
     loadDataInMochApi(currentPage);
     search();
-
-    // Проверяем, есть ли id в URL
-    const url = new URL(window.location.href);
-    const pathSegments = url.pathname.split('/');
-    const attractionId = pathSegments[pathSegments.length - 1]; // Получаем последний сегмент пути
-    if (attractionId && !isNaN(attractionId)) {
-        openModalById(attractionId); // Открываем модальное окно сразу после загрузки
-    }
 });
 
 function populatecategoryFilter(categorys) {
@@ -52,8 +44,7 @@ function populatecategoryFilter(categorys) {
 
 closeBtn.addEventListener('click', () => {
     socialPanelContainer.classList.remove('visible');
-    // Убираем параметр id из URL при закрытии модального окна
-    history.pushState({}, '', '/'); // Возвращаемся к корневому пути
+    history.pushState({}, '', '/sight/attraction.html');
 });
 
 function showLoader() {
@@ -85,8 +76,8 @@ function loadDataInMochApi(item) {
 
         let infoBtn = document.getElementById(`btn_${i}`);
         infoBtn.addEventListener('click', () => {
-            // Изменяем URL добавляя id достопримечательности через путь
-            history.pushState({}, '', `/id/${t.id}`);
+            // Изменяем URL, добавляя полный путь, включая базовый путь
+            history.pushState({}, '', `/sight/attraction.html/id/${t.id}`);
             openModalById(t.id); // Открываем модальное окно
         });
     }
@@ -170,10 +161,24 @@ async function openModalById(id) {
             <div class="modal__title">${attraction.name}</div>
             <div class="modal__box">
                 <div class="modal__text">${attraction.title}</div>
-                <img class="modal__img" src="${attraction.img}">
             </div>
-            <div id="map"></div>`;
+            <div class="modal__gallery">
+                ${attraction.images.map(img => `
+                    <img class="modal__gallery-item" src="${img}" alt="${attraction.name}">
+                `).join('')}
+            </div>
+            <div id="map"></div>
+            <div class="fullscreen-gallery">
+                <div class="fullscreen-gallery__close">&times;</div>
+                <div class="fullscreen-gallery__content">
+                    <img class="fullscreen-gallery__image" src="">
+                </div>
+                <div class="fullscreen-gallery__prev">&#10094;</div>
+                <div class="fullscreen-gallery__next">&#10095;</div>
+            </div>
+        `;
 
+        // Инициализация Yandex Maps
         ymaps.ready(() => {
             const map = new ymaps.Map('map', {
                 center: [attraction.lat, attraction.lng],
@@ -181,6 +186,41 @@ async function openModalById(id) {
             });
             const placemark = new ymaps.Placemark([attraction.lat, attraction.lng]);
             map.geoObjects.add(placemark);
+        });
+
+        // Инициализация галереи
+        const galleryItems = document.querySelectorAll('.modal__gallery-item');
+        const fullscreenGallery = document.querySelector('.fullscreen-gallery');
+        const fullscreenImage = document.querySelector('.fullscreen-gallery__image');
+        const closeFullscreen = document.querySelector('.fullscreen-gallery__close');
+        const prevButton = document.querySelector('.fullscreen-gallery__prev');
+        const nextButton = document.querySelector('.fullscreen-gallery__next');
+        let currentImageIndex = 0;
+
+        // Открытие полноэкранной галереи
+        galleryItems.forEach((item, index) => {
+            item.addEventListener('click', () => {
+                currentImageIndex = index;
+                fullscreenImage.src = item.src;
+                fullscreenGallery.style.display = 'flex';
+            });
+        });
+
+        // Закрытие полноэкранной галереи
+        closeFullscreen.addEventListener('click', () => {
+            fullscreenGallery.style.display = 'none';
+        });
+
+        // Переключение на предыдущее фото
+        prevButton.addEventListener('click', () => {
+            currentImageIndex = (currentImageIndex - 1 + attraction.images.length) % attraction.images.length;
+            fullscreenImage.src = attraction.images[currentImageIndex];
+        });
+
+        // Переключение на следующее фото
+        nextButton.addEventListener('click', () => {
+            currentImageIndex = (currentImageIndex + 1) % attraction.images.length;
+            fullscreenImage.src = attraction.images[currentImageIndex];
         });
     }
 }
