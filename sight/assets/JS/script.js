@@ -22,7 +22,7 @@ addEventListener('load', async () => {
     totalItems = filteredPersone.length;
     totalPages = Math.ceil(totalItems / itemOnPage);
 
-    // Беру параметр category и добавляю в html categoryFilter уникальные районы
+    // Беру параметр category и добавляю в html categoryFilter уникальные категории
     const uniquecategory = [...new Set(persone.map(person => person.category))];
     populatecategoryFilter(uniquecategory);
 
@@ -177,6 +177,13 @@ async function openModalById(id) {
                     <form class="review-form">
                         <input type="text" class="review-author" placeholder="Ваше имя" required>
                         <textarea class="review-text" placeholder="Ваш отзыв" required></textarea>
+                        <div class="rating">
+                            <span class="rating__star" data-rating="1">★</span>
+                            <span class="rating__star" data-rating="2">★</span>
+                            <span class="rating__star" data-rating="3">★</span>
+                            <span class="rating__star" data-rating="4">★</span>
+                            <span class="rating__star" data-rating="5">★</span>
+                        </div>
                         <button type="submit" class="sortName">Добавить отзыв</button>
                     </form>
                 </div>
@@ -201,34 +208,75 @@ async function openModalById(id) {
             map.geoObjects.add(placemark);
         });
 
-        // Загрузка отзывов из локального хранилища
+        // Загрузка отзывов с сервера
         const reviewsContainer = document.querySelector('.reviews-list');
-        const reviews = getReviewsFromLocalStorage(attraction.id); // Получаем отзывы из localStorage
+        const reviews = await fetchReviewsFromServer(attraction.id); // Получаем отзывы с сервера
         renderReviews(reviewsContainer, reviews, attraction.id); // Рендерим отзывы
 
         // Обработка формы для добавления отзывов
         const reviewForm = document.querySelector('.review-form');
+        const ratingStars = document.querySelectorAll('.rating__star');
+        let selectedRating = 0;
+
+        // Обработка выбора оценки
+        ratingStars.forEach(star => {
+            star.addEventListener('click', () => {
+                selectedRating = parseInt(star.getAttribute('data-rating'));
+                ratingStars.forEach(s => s.classList.remove('selected'));
+                for (let i = 0; i < selectedRating; i++) {
+                    ratingStars[i].classList.add('selected');
+                }
+            });
+        });
+
         reviewForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Валидация формы
             const authorInput = document.querySelector('.review-author');
             const textInput = document.querySelector('.review-text');
 
+            if (!authorInput.value.trim()) {
+                alert('Пожалуйста, введите ваше имя.');
+                return;
+            }
+
+            if (!textInput.value.trim()) {
+                alert('Пожалуйста, введите текст отзыва.');
+                return;
+            }
+
+            if (selectedRating === 0) {
+                alert('Пожалуйста, выберите оценку.');
+                return;
+            }
+
             const newReview = {
-                id: Date.now(), // Уникальный идентификатор отзыва
-                author: authorInput.value,
-                text: textInput.value,
+                author: authorInput.value.trim(),
+                text: textInput.value.trim(),
+                rating: selectedRating,
             };
 
-            // Добавляем отзыв в список
-            const reviewElement = createReviewElement(newReview, attraction.id);
-            reviewsContainer.appendChild(reviewElement);
+            // Отправка отзыва на сервер
+            const success = await saveReviewToServer(attraction.id, newReview);
 
-            // Очищаем форму
-            authorInput.value = '';
-            textInput.value = '';
+            if (success) {
+                // Добавляем отзыв в список
+                const reviewElement = createReviewElement(newReview, attraction.id);
+                reviewsContainer.appendChild(reviewElement);
 
-            // Сохраняем отзыв в локальное хранилище
-            saveReviewToLocalStorage(attraction.id, newReview);
+                // Очищаем форму
+                authorInput.value = '';
+                textInput.value = '';
+                ratingStars.forEach(s => s.classList.remove('selected'));
+                selectedRating = 0;
+
+                // Обновляем список отзывов
+                const updatedReviews = await fetchReviewsFromServer(attraction.id);
+                renderReviews(reviewsContainer, updatedReviews, attraction.id);
+            } else {
+                alert('Ошибка при добавлении отзыва. Попробуйте снова.');
+            }
         });
 
         // Инициализация галереи
@@ -267,6 +315,7 @@ async function openModalById(id) {
         });
     }
 }
+
 // Функция для создания элемента отзыва
 function createReviewElement(review, attractionId) {
     const reviewElement = document.createElement('div');
@@ -274,16 +323,24 @@ function createReviewElement(review, attractionId) {
     reviewElement.innerHTML = `
         <div class="review__author">${review.author}</div>
         <div class="review__text">${review.text}</div>
+        <div class="review__rating">
+            ${'★'.repeat(review.rating)}
+            ${'☆'.repeat(5 - review.rating)}
+        </div>
         <button class="review__delete">Удалить</button>
     `;
 
     // Обработка удаления отзыва
     const deleteButton = reviewElement.querySelector('.review__delete');
-    deleteButton.addEventListener('click', () => {
-        deleteReviewFromLocalStorage(attractionId, review.id); // Удаляем отзыв из localStorage
-        const reviewsContainer = document.querySelector('.reviews-list');
-        const reviews = getReviewsFromLocalStorage(attractionId); // Обновляем список отзывов
-        renderReviews(reviewsContainer, reviews, attractionId); // Рендерим обновленный список
+    deleteButton.addEventListener('click', async () => {
+        const success = await deleteReviewFromServer(review.id); // Удаляем отзыв с сервера
+        if (success) {
+            const reviewsContainer = document.querySelector('.reviews-list');
+            const reviews = await fetchReviewsFromServer(attractionId); // Обновляем список отзывов
+            renderReviews(reviewsContainer, reviews, attractionId); // Рендерим обновленный список
+        } else {
+            alert('Ошибка удалении отзыва');
+        }
     });
 
     return reviewElement;
@@ -304,22 +361,49 @@ function getCurrentAttractionId() {
     return urlParams.get('id');
 }
 
-// Функция для получения отзывов из локального хранилища
-function getReviewsFromLocalStorage(attractionId) {
-    const reviews = JSON.parse(localStorage.getItem('reviews')) || [];
-    return reviews.filter(review => review.attractionId === attractionId);
+// Функция для получения отзывов с сервера
+async function fetchReviewsFromServer(attractionId) {
+    try {
+        const response = await fetch(`https://6729bdac6d5fa4901b6e27f4.mockapi.io/reviews`);
+        if (!response.ok) {
+            throw new Error('Ошибка загрузке отзывов');
+        }
+        const reviews = await response.json();
+        // Фильтруем отзывы по attractionId
+        return reviews.filter(review => review.attractionId === attractionId);
+    } catch (error) {
+        console.error('Ошибка загрузке отзывов', error);
+        return [];
+    }
 }
 
-// Функция для сохранения отзыва в локальное хранилище
-function saveReviewToLocalStorage(attractionId, review) {
-    const reviews = JSON.parse(localStorage.getItem('reviews')) || [];
-    reviews.push({ attractionId, ...review });
-    localStorage.setItem('reviews', JSON.stringify(reviews));
+// Функция для сохранения отзыва на сервере
+async function saveReviewToServer(attractionId, review) {
+    try {
+        const response = await fetch(`https://6729bdac6d5fa4901b6e27f4.mockapi.io/reviews`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ attractionId, ...review }),
+        });
+
+        return response.ok; // Возвращаем true, если запрос успешен
+    } catch (error) {
+        console.error('Ошибка сохранении отзыва', error);
+        return false;
+    }
 }
 
-// Функция для удаления отзыва из локального хранилища
-function deleteReviewFromLocalStorage(attractionId, reviewId) {
-    let reviews = JSON.parse(localStorage.getItem('reviews')) || [];
-    reviews = reviews.filter(review => !(review.attractionId === attractionId && review.id === reviewId));
-    localStorage.setItem('reviews', JSON.stringify(reviews));
+// Функция для удаления отзыва с сервера
+async function deleteReviewFromServer(reviewId) {
+    try {
+        const response = await fetch(`https://6729bdac6d5fa4901b6e27f4.mockapi.io/reviews/${reviewId}`, {
+            method: 'DELETE',
+        });
+        return response.ok; // Возвращаем true, если запрос успешен
+    } catch (error) {
+        console.error('Ошибка удалении отзыва', error);
+        return false;
+    }
 }
