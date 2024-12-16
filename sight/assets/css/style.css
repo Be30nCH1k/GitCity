@@ -647,7 +647,7 @@ body {
 } 
  
 
-#sortName{
+.sortName{
   background-color: #01b3a7;
   padding: 15px 25px;
   font-size: 16px;
@@ -660,7 +660,7 @@ body {
     margin-left: 70px;
   }
 }
-#sortName:hover{
+.sortName:hover{
   background-color: #fff;
   color: #179cd1;
 }
@@ -722,4 +722,70 @@ body {
   margin: 20px 0px 0px 35px;
   width: 200px;
   height: 150px;
+}
+
+.modal__reviews {
+  width: 30%; 
+  margin-left: 20px;
+  padding: 10px;
+  border-left: 5px solid #ccc; 
+  box-sizing: border-box;
+}
+
+.modal__reviews h3 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.reviews-list {
+  max-height: 300px; 
+  overflow-y: auto; /* Прокрутка, если отзывов много */
+}
+
+.review {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 3px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.review__author {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.review__text {
+  font-size: 24px;
+}
+.review-form {
+  margin-top: 20px;
+}
+
+.review-form input,
+.review-form textarea {
+  font-size: 24px;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 3px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.modal__base{
+  display: flex;
+}
+.review__delete {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.review__delete:hover {
+  background-color: #cc0000;
 }

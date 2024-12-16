@@ -158,16 +158,29 @@ async function openModalById(id) {
     if (attraction) {
         socialPanelContainer.classList.add('visible');
         modalSocial.innerHTML = `
-            <div class="modal__title">${attraction.name}</div>
-            <div class="modal__box">
-                <div class="modal__text">${attraction.title}</div>
+            <div class="modal__base">
+                <div>
+                    <div class="modal__title">${attraction.name}</div>
+                    <div class="modal__box">
+                        <div class="modal__text">${attraction.title}</div>
+                    </div>
+                    <div class="modal__gallery">
+                        ${attraction.images.map(img => `
+                            <img class="modal__gallery-item" src="${img}" alt="${attraction.name}">
+                        `).join('')}
+                    </div>
+                    <div id="map"></div>
+                </div>
+                <div class="modal__reviews">
+                    <h3>Отзывы</h3>
+                    <div class="reviews-list"></div>
+                    <form class="review-form">
+                        <input type="text" class="review-author" placeholder="Ваше имя" required>
+                        <textarea class="review-text" placeholder="Ваш отзыв" required></textarea>
+                        <button type="submit" class="sortName">Добавить отзыв</button>
+                    </form>
+                </div>
             </div>
-            <div class="modal__gallery">
-                ${attraction.images.map(img => `
-                    <img class="modal__gallery-item" src="${img}" alt="${attraction.name}">
-                `).join('')}
-            </div>
-            <div id="map"></div>
             <div class="fullscreen-gallery">
                 <div class="fullscreen-gallery__close">&times;</div>
                 <div class="fullscreen-gallery__content">
@@ -186,6 +199,36 @@ async function openModalById(id) {
             });
             const placemark = new ymaps.Placemark([attraction.lat, attraction.lng]);
             map.geoObjects.add(placemark);
+        });
+
+        // Загрузка отзывов из локального хранилища
+        const reviewsContainer = document.querySelector('.reviews-list');
+        const reviews = getReviewsFromLocalStorage(attraction.id); // Получаем отзывы из localStorage
+        renderReviews(reviewsContainer, reviews, attraction.id); // Рендерим отзывы
+
+        // Обработка формы для добавления отзывов
+        const reviewForm = document.querySelector('.review-form');
+        reviewForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const authorInput = document.querySelector('.review-author');
+            const textInput = document.querySelector('.review-text');
+
+            const newReview = {
+                id: Date.now(), // Уникальный идентификатор отзыва
+                author: authorInput.value,
+                text: textInput.value,
+            };
+
+            // Добавляем отзыв в список
+            const reviewElement = createReviewElement(newReview, attraction.id);
+            reviewsContainer.appendChild(reviewElement);
+
+            // Очищаем форму
+            authorInput.value = '';
+            textInput.value = '';
+
+            // Сохраняем отзыв в локальное хранилище
+            saveReviewToLocalStorage(attraction.id, newReview);
         });
 
         // Инициализация галереи
@@ -223,4 +266,60 @@ async function openModalById(id) {
             fullscreenImage.src = attraction.images[currentImageIndex];
         });
     }
+}
+// Функция для создания элемента отзыва
+function createReviewElement(review, attractionId) {
+    const reviewElement = document.createElement('div');
+    reviewElement.classList.add('review');
+    reviewElement.innerHTML = `
+        <div class="review__author">${review.author}</div>
+        <div class="review__text">${review.text}</div>
+        <button class="review__delete">Удалить</button>
+    `;
+
+    // Обработка удаления отзыва
+    const deleteButton = reviewElement.querySelector('.review__delete');
+    deleteButton.addEventListener('click', () => {
+        deleteReviewFromLocalStorage(attractionId, review.id); // Удаляем отзыв из localStorage
+        const reviewsContainer = document.querySelector('.reviews-list');
+        const reviews = getReviewsFromLocalStorage(attractionId); // Обновляем список отзывов
+        renderReviews(reviewsContainer, reviews, attractionId); // Рендерим обновленный список
+    });
+
+    return reviewElement;
+}
+
+// Функция для рендеринга отзывов
+function renderReviews(container, reviews, attractionId) {
+    container.innerHTML = ''; // Очищаем контейнер
+    reviews.forEach(review => {
+        const reviewElement = createReviewElement(review, attractionId);
+        container.appendChild(reviewElement);
+    });
+}
+
+// Функция для получения текущего ID достопримечательности
+function getCurrentAttractionId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('id');
+}
+
+// Функция для получения отзывов из локального хранилища
+function getReviewsFromLocalStorage(attractionId) {
+    const reviews = JSON.parse(localStorage.getItem('reviews')) || [];
+    return reviews.filter(review => review.attractionId === attractionId);
+}
+
+// Функция для сохранения отзыва в локальное хранилище
+function saveReviewToLocalStorage(attractionId, review) {
+    const reviews = JSON.parse(localStorage.getItem('reviews')) || [];
+    reviews.push({ attractionId, ...review });
+    localStorage.setItem('reviews', JSON.stringify(reviews));
+}
+
+// Функция для удаления отзыва из локального хранилища
+function deleteReviewFromLocalStorage(attractionId, reviewId) {
+    let reviews = JSON.parse(localStorage.getItem('reviews')) || [];
+    reviews = reviews.filter(review => !(review.attractionId === attractionId && review.id === reviewId));
+    localStorage.setItem('reviews', JSON.stringify(reviews));
 }
