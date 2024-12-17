@@ -375,6 +375,9 @@ body {
   border: 0px;
   border-radius: 10px;
   cursor: pointer;
+  @media (max-width:376px) {
+    margin: 20px 0 0 70px;
+  }
 }
 
 .footer {
@@ -585,6 +588,7 @@ body {
   @media (max-width:376px) {
    padding-top: 10px;
    height: 240px;
+   width: 345px;
   }
 }
 .modal__text{
@@ -592,6 +596,7 @@ body {
   font-size: 24px;
   @media (max-width:376px) {
     font-size: 12px;
+    width: 270px;
   }
 }
 #pagination button{
@@ -722,6 +727,11 @@ body {
   margin: 20px 0px 0px 35px;
   width: 200px;
   height: 150px;
+  @media (max-width:376px) {
+    width: 100px;
+    height: 100px;
+    margin-left: 10px;
+  }
 }
 
 .modal__reviews {

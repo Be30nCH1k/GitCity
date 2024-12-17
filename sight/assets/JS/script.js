@@ -21,8 +21,7 @@ addEventListener('load', async () => {
     filteredPersone = [...persone];
     totalItems = filteredPersone.length;
     totalPages = Math.ceil(totalItems / itemOnPage);
-
-    // Беру параметр category и добавляю в html categoryFilter уникальные категории
+    // создает массив уникальных категорий из массива объектов persone где каждый объект представляет отдельную карточку и содержит свойство category
     const uniquecategory = [...new Set(persone.map(person => person.category))];
     populatecategoryFilter(uniquecategory);
 
@@ -31,6 +30,7 @@ addEventListener('load', async () => {
     search();
 });
 
+//Функция фильтра
 function populatecategoryFilter(categorys) {
     // Очистка текущий функции
     categoryFilter.innerHTML = '<option value="">Фильтр по категориям</option>';
@@ -42,15 +42,18 @@ function populatecategoryFilter(categorys) {
     });
 }
 
+//Закрытие модального окна и изменение url путя
 closeBtn.addEventListener('click', () => {
     socialPanelContainer.classList.remove('visible');
     history.pushState({}, '', '/sight/attraction.html');
 });
 
+//Функция для показа лоадера
 function showLoader() {
     document.getElementById('loader').style.display = 'block';
 }
 
+//Функция для скрытия лоадера
 function hideLoader() {
     document.getElementById('loader').style.display = 'none';
 }
@@ -86,6 +89,7 @@ function loadDataInMochApi(item) {
     hideLoader(); // Скрываем лоадер после загрузки данных
 }
 
+//Функция для обновление пагинации при добовление данных на mockApi
 function updatePagination() {
     const paginationContainer = document.getElementById('pagination');
     paginationContainer.innerHTML = '';
@@ -104,6 +108,7 @@ function changePage(page) {
     loadDataInMochApi(currentPage);
 }
 
+//Функция Поиска на сервере mockApi
 async function search() {
     searchInput.addEventListener('input', async function () {
         const query = this.value.trim().toLowerCase();
@@ -123,11 +128,12 @@ async function search() {
     });
 }
 
+//Функция которая сортирует данные по категориям
 categoryFilter.addEventListener('change', async function () {
     const query = searchInput.value.trim().toLowerCase();
     const category = this.value;
 
-    // А это основной фильтр
+    //Это основной фильтр
     filteredPersone = persone.filter(person =>
         person.name.toLowerCase().includes(query) &&
         (category === '' || person.category === category) // Фильтрация по категории
@@ -140,6 +146,7 @@ categoryFilter.addEventListener('change', async function () {
     loadDataInMochApi(currentPage);
 });
 
+//Функция для сортировки по алфавиту
 function sortData(order) {
     if (order === 'abc') {
         persone.sort((a, b) => a.name.localeCompare(b.name));
@@ -275,7 +282,7 @@ async function openModalById(id) {
                 const updatedReviews = await fetchReviewsFromServer(attraction.id);
                 renderReviews(reviewsContainer, updatedReviews, attraction.id);
             } else {
-                alert('Ошибка при добавлении отзыва. Попробуйте снова.');
+                alert('Ошибка добавлении отзыва');
             }
         });
 
