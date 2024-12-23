@@ -9,63 +9,71 @@ const modalSocial = document.querySelector('.main__modal');
 
 const itemOnPage = 10;
 let currentPage = 1;
-let persone = [];
-let filteredPersone = [];
-let totalItems;
-let totalPages;
+let totalItems = 100; // Hard coding общее количество элементов
+let totalPages = Math.ceil(totalItems / itemOnPage); // Hard coding общее количество страниц
+let categories = []; // Массив для хранения категорий
 
 addEventListener('load', async () => {
     showLoader();
-    const response = await fetch(mochApi);
-    persone = await response.json();
-    filteredPersone = [...persone];
-    totalItems = filteredPersone.length;
-    totalPages = Math.ceil(totalItems / itemOnPage);
-    // создает массив уникальных категорий из массива объектов persone где каждый объект представляет отдельную карточку и содержит свойство category
-    const uniquecategory = [...new Set(persone.map(person => person.category))];
-    populatecategoryFilter(uniquecategory);
-
+    await loadDataFromServer(currentPage); // Загружаем данные с сервера
     hideLoader();
-    loadDataInMochApi(currentPage);
+
+    // Загружаем категории
+    const response = await fetch(mochApi);
+    const data = await response.json();
+    categories = [...new Set(data.map(item => item.category))]; // Уникальные категории
+    populatecategoryFilter(categories); // Заполняем фильтр категорий
+
+    const hash = window.location.hash.substring(1);
+    const [key, value] = hash.split('/');
+    if (key === 'id') {
+        openModalById(value);
+    }
+
+    // Добавляем вызов функции поиска
     search();
 });
 
-//Функция фильтра
 function populatecategoryFilter(categorys) {
-    // Очистка текущий функции
     categoryFilter.innerHTML = '<option value="">Фильтр по категориям</option>';
     categorys.forEach(category => {
         const option = document.createElement('option');
-        option.value = category; // Значение для фильтрации
-        option.textContent = category; // Отображаемый текст
+        option.value = category;
+        option.textContent = category;
         categoryFilter.appendChild(option);
     });
 }
 
-//Закрытие модального окна и изменение url путя
+let scrollPosition = 0; // Переменная для хранения позиции прокрутки
+
 closeBtn.addEventListener('click', () => {
     socialPanelContainer.classList.remove('visible');
-    history.pushState({}, '', '/sight/attraction.html');
+    window.location.hash = '';
+    window.scrollTo(0, scrollPosition); // Восстанавливаем позицию прокрутки
 });
 
-//Функция для показа лоадера
 function showLoader() {
     document.getElementById('loader').style.display = 'block';
 }
 
-//Функция для скрытия лоадера
 function hideLoader() {
     document.getElementById('loader').style.display = 'none';
 }
 
-function loadDataInMochApi(item) {
-    showLoader(); // Показываем лоадер перед загрузкой данных
-    container.innerHTML = '';
-    const start = (item - 1) * itemOnPage;
-    const end = Math.min(start + itemOnPage, totalItems);
+async function loadDataFromServer(page, query = '', category = '') {
+    showLoader();
+    const url = new URL(mochApi);
+    url.searchParams.append('page', page);
+    url.searchParams.append('limit', itemOnPage);
 
-    for (let i = start; i < end; i++) {
-        const t = filteredPersone[i];
+    if (query) url.searchParams.append('name', query); // Используем name для поиска
+    if (category) url.searchParams.append('category', category); // Фильтр по категории
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    container.innerHTML = '';
+    data.forEach((t, i) => {
         const search = document.createElement('div');
         search.classList.add('info__main');
         search.setAttribute('data-title', t.name);
@@ -79,17 +87,16 @@ function loadDataInMochApi(item) {
 
         let infoBtn = document.getElementById(`btn_${i}`);
         infoBtn.addEventListener('click', () => {
-            // Изменяем URL, добавляя полный путь, включая базовый путь
-            history.pushState({}, '', `/sight/attraction.html/id/${t.id}`);
-            openModalById(t.id); // Открываем модальное окно
+            scrollPosition = window.scrollY; // Сохраняем текущую позицию прокрутки
+            window.location.hash = `id/${t.id}`;
+            openModalById(t.id);
         });
-    }
+    });
 
     updatePagination();
-    hideLoader(); // Скрываем лоадер после загрузки данных
+    hideLoader();
 }
 
-//Функция для обновление пагинации при добовление данных на mockApi
 function updatePagination() {
     const paginationContainer = document.getElementById('pagination');
     paginationContainer.innerHTML = '';
@@ -103,65 +110,69 @@ function updatePagination() {
 }
 
 function changePage(page) {
-    showLoader(); // Показываем лоадер перед загрузкой данных
     currentPage = page;
-    loadDataInMochApi(currentPage);
+    const query = searchInput.value.trim().toLowerCase();
+    const category = categoryFilter.value;
+    loadDataFromServer(page, query, category);
 }
 
-//Функция Поиска на сервере mockApi
 async function search() {
     searchInput.addEventListener('input', async function () {
         const query = this.value.trim().toLowerCase();
-        const category = categoryFilter.value; // Получаем выбранный категорию
-
-        // Это фильтр для поиска
-        filteredPersone = persone.filter(person =>
-            person.name.toLowerCase().includes(query) &&
-            (category === '' || person.category === category) // Фильтрация по категории
-        );
-
-        totalItems = filteredPersone.length;
-        totalPages = Math.ceil(totalItems / itemOnPage);
+        const category = categoryFilter.value;
         currentPage = 1;
-
-        loadDataInMochApi(currentPage);
+        await loadDataFromServer(currentPage, query, category);
     });
 }
 
-//Функция которая сортирует данные по категориям
 categoryFilter.addEventListener('change', async function () {
     const query = searchInput.value.trim().toLowerCase();
     const category = this.value;
-
-    //Это основной фильтр
-    filteredPersone = persone.filter(person =>
-        person.name.toLowerCase().includes(query) &&
-        (category === '' || person.category === category) // Фильтрация по категории
-    );
-
-    totalItems = filteredPersone.length;
-    totalPages = Math.ceil(totalItems / itemOnPage);
     currentPage = 1;
-
-    loadDataInMochApi(currentPage);
+    await loadDataFromServer(currentPage, query, category);
 });
 
-//Функция для сортировки по алфавиту
 function sortData(order) {
     if (order === 'abc') {
-        persone.sort((a, b) => a.name.localeCompare(b.name));
+        const url = new URL(mochApi);
+        url.searchParams.append('sortBy', 'name');
+        url.searchParams.append('order', 'asc');
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                container.innerHTML = '';
+                data.forEach((t, i) => {
+                    const search = document.createElement('div');
+                    search.classList.add('info__main');
+                    search.setAttribute('data-title', t.name);
+                    search.innerHTML = `
+                        <img class="info__img" src="${t.img}" alt="картинки ${i + 1}">
+                        <div class="info__box">
+                            <div class="info__title">${t.name}</div>
+                            <button class="info__btn floating-btn" id="btn_${i}">Узнать больше</button>
+                        </div>`;
+                    container.append(search);
+
+                    let infoBtn = document.getElementById(`btn_${i}`);
+                    infoBtn.addEventListener('click', () => {
+                        scrollPosition = window.scrollY;
+                        window.location.hash = `id/${t.id}`;
+                        openModalById(t.id);
+                    });
+                });
+            });
     }
-    filteredPersone = [...persone];
-    loadDataInMochApi(currentPage);
 }
 
 document.getElementById('sortName').addEventListener('click', () => {
     sortData('abc');
 });
 
-// Функция для открытия модального окна по id
 async function openModalById(id) {
-    const attraction = persone.find(person => person.id === id);
+    const response = await fetch(`${mochApi}/${id}`);
+    const attraction = await response.json();
+
     if (attraction) {
         socialPanelContainer.classList.add('visible');
         modalSocial.innerHTML = `
@@ -205,7 +216,6 @@ async function openModalById(id) {
             </div>
         `;
 
-        // Инициализация Yandex Maps
         ymaps.ready(() => {
             const map = new ymaps.Map('map', {
                 center: [attraction.lat, attraction.lng],
@@ -215,17 +225,14 @@ async function openModalById(id) {
             map.geoObjects.add(placemark);
         });
 
-        // Загрузка отзывов с сервера
         const reviewsContainer = document.querySelector('.reviews-list');
-        const reviews = await fetchReviewsFromServer(attraction.id); // Получаем отзывы с сервера
-        renderReviews(reviewsContainer, reviews, attraction.id); // Рендерим отзывы
+        const reviews = await fetchReviewsFromServer(attraction.id);
+        renderReviews(reviewsContainer, reviews, attraction.id);
 
-        // Обработка формы для добавления отзывов
         const reviewForm = document.querySelector('.review-form');
         const ratingStars = document.querySelectorAll('.rating__star');
         let selectedRating = 0;
 
-        // Обработка выбора оценки
         ratingStars.forEach(star => {
             star.addEventListener('click', () => {
                 selectedRating = parseInt(star.getAttribute('data-rating'));
@@ -239,22 +246,21 @@ async function openModalById(id) {
         reviewForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Валидация формы
             const authorInput = document.querySelector('.review-author');
             const textInput = document.querySelector('.review-text');
 
             if (!authorInput.value.trim()) {
-                alert('Пожалуйста, введите ваше имя.');
+                alert('Введите ваше имя');
                 return;
             }
 
             if (!textInput.value.trim()) {
-                alert('Пожалуйста, введите текст отзыва.');
+                alert('Введите текст отзыва');
                 return;
             }
 
             if (selectedRating === 0) {
-                alert('Пожалуйста, выберите оценку.');
+                alert('Выберите оценку');
                 return;
             }
 
@@ -264,21 +270,17 @@ async function openModalById(id) {
                 rating: selectedRating,
             };
 
-            // Отправка отзыва на сервер
             const success = await saveReviewToServer(attraction.id, newReview);
 
             if (success) {
-                // Добавляем отзыв в список
                 const reviewElement = createReviewElement(newReview, attraction.id);
                 reviewsContainer.appendChild(reviewElement);
 
-                // Очищаем форму
                 authorInput.value = '';
                 textInput.value = '';
                 ratingStars.forEach(s => s.classList.remove('selected'));
                 selectedRating = 0;
 
-                // Обновляем список отзывов
                 const updatedReviews = await fetchReviewsFromServer(attraction.id);
                 renderReviews(reviewsContainer, updatedReviews, attraction.id);
             } else {
@@ -286,7 +288,6 @@ async function openModalById(id) {
             }
         });
 
-        // Инициализация галереи
         const galleryItems = document.querySelectorAll('.modal__gallery-item');
         const fullscreenGallery = document.querySelector('.fullscreen-gallery');
         const fullscreenImage = document.querySelector('.fullscreen-gallery__image');
@@ -295,7 +296,6 @@ async function openModalById(id) {
         const nextButton = document.querySelector('.fullscreen-gallery__next');
         let currentImageIndex = 0;
 
-        // Открытие полноэкранной галереи
         galleryItems.forEach((item, index) => {
             item.addEventListener('click', () => {
                 currentImageIndex = index;
@@ -304,18 +304,15 @@ async function openModalById(id) {
             });
         });
 
-        // Закрытие полноэкранной галереи
         closeFullscreen.addEventListener('click', () => {
             fullscreenGallery.style.display = 'none';
         });
 
-        // Переключение на предыдущее фото
         prevButton.addEventListener('click', () => {
             currentImageIndex = (currentImageIndex - 1 + attraction.images.length) % attraction.images.length;
             fullscreenImage.src = attraction.images[currentImageIndex];
         });
 
-        // Переключение на следующее фото
         nextButton.addEventListener('click', () => {
             currentImageIndex = (currentImageIndex + 1) % attraction.images.length;
             fullscreenImage.src = attraction.images[currentImageIndex];
@@ -323,7 +320,6 @@ async function openModalById(id) {
     }
 }
 
-// Функция для создания элемента отзыва
 function createReviewElement(review, attractionId) {
     const reviewElement = document.createElement('div');
     reviewElement.classList.add('review');
@@ -337,14 +333,13 @@ function createReviewElement(review, attractionId) {
         <button class="review__delete">Удалить</button>
     `;
 
-    // Обработка удаления отзыва
     const deleteButton = reviewElement.querySelector('.review__delete');
     deleteButton.addEventListener('click', async () => {
-        const success = await deleteReviewFromServer(review.id); // Удаляем отзыв с сервера
+        const success = await deleteReviewFromServer(review.id);
         if (success) {
             const reviewsContainer = document.querySelector('.reviews-list');
-            const reviews = await fetchReviewsFromServer(attractionId); // Обновляем список отзывов
-            renderReviews(reviewsContainer, reviews, attractionId); // Рендерим обновленный список
+            const reviews = await fetchReviewsFromServer(attractionId);
+            renderReviews(reviewsContainer, reviews, attractionId);
         } else {
             alert('Ошибка удалении отзыва');
         }
@@ -353,22 +348,14 @@ function createReviewElement(review, attractionId) {
     return reviewElement;
 }
 
-// Функция для рендеринга отзывов
 function renderReviews(container, reviews, attractionId) {
-    container.innerHTML = ''; // Очищаем контейнер
+    container.innerHTML = '';
     reviews.forEach(review => {
         const reviewElement = createReviewElement(review, attractionId);
         container.appendChild(reviewElement);
     });
 }
 
-// Функция для получения текущего ID достопримечательности
-function getCurrentAttractionId() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('id');
-}
-
-// Функция для получения отзывов с сервера
 async function fetchReviewsFromServer(attractionId) {
     try {
         const response = await fetch(`https://6729bdac6d5fa4901b6e27f4.mockapi.io/reviews`);
@@ -376,7 +363,6 @@ async function fetchReviewsFromServer(attractionId) {
             throw new Error('Ошибка загрузке отзывов');
         }
         const reviews = await response.json();
-        // Фильтруем отзывы по attractionId
         return reviews.filter(review => review.attractionId === attractionId);
     } catch (error) {
         console.error('Ошибка загрузке отзывов', error);
@@ -384,7 +370,6 @@ async function fetchReviewsFromServer(attractionId) {
     }
 }
 
-// Функция для сохранения отзыва на сервере
 async function saveReviewToServer(attractionId, review) {
     try {
         const response = await fetch(`https://6729bdac6d5fa4901b6e27f4.mockapi.io/reviews`, {
@@ -395,20 +380,19 @@ async function saveReviewToServer(attractionId, review) {
             body: JSON.stringify({ attractionId, ...review }),
         });
 
-        return response.ok; // Возвращаем true, если запрос успешен
+        return response.ok;
     } catch (error) {
         console.error('Ошибка сохранении отзыва', error);
         return false;
     }
 }
 
-// Функция для удаления отзыва с сервера
 async function deleteReviewFromServer(reviewId) {
     try {
         const response = await fetch(`https://6729bdac6d5fa4901b6e27f4.mockapi.io/reviews/${reviewId}`, {
             method: 'DELETE',
         });
-        return response.ok; // Возвращаем true, если запрос успешен
+        return response.ok;
     } catch (error) {
         console.error('Ошибка удалении отзыва', error);
         return false;
