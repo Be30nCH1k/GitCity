@@ -803,3 +803,22 @@ body {
   font-size: 24px;
   cursor: pointer;
 }
+.fullscreen-gallery__mini-box {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.fullscreen-gallery__mini {
+  width: 150px; 
+  height: 150px;
+  margin: 0 5px;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.fullscreen-gallery__mini.active {
+  border-color: #007bff;
+}

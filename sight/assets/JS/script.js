@@ -213,111 +213,120 @@ async function openModalById(id) {
                 </div>
                 <div class="fullscreen-gallery__prev">&#10094;</div>
                 <div class="fullscreen-gallery__next">&#10095;</div>
+                <div class="fullscreen-gallery__mini-box">
+                    <div class="fullscreen-gallery__mini"></div>
+                </div>
             </div>
         `;
 
-        ymaps.ready(() => {
-            const map = new ymaps.Map('map', {
-                center: [attraction.lat, attraction.lng],
-                zoom: 17,
-            });
-            const placemark = new ymaps.Placemark([attraction.lat, attraction.lng]);
-            map.geoObjects.add(placemark);
+    ymaps.ready(() => {
+        const map = new ymaps.Map('map', {
+            center: [attraction.lat, attraction.lng],
+            zoom: 17,
         });
+        const placemark = new ymaps.Placemark([attraction.lat, attraction.lng]);
+        map.geoObjects.add(placemark);
+    });
 
-        const reviewsContainer = document.querySelector('.reviews-list');
-        const reviews = await fetchReviewsFromServer(attraction.id);
-        renderReviews(reviewsContainer, reviews, attraction.id);
+const reviewsContainer = document.querySelector('.reviews-list');
+const reviews = await fetchReviewsFromServer(attraction.id);
+renderReviews(reviewsContainer, reviews, attraction.id);
 
-        const reviewForm = document.querySelector('.review-form');
-        const ratingStars = document.querySelectorAll('.rating__star');
-        let selectedRating = 0;
+const reviewForm = document.querySelector('.review-form');
+const ratingStars = document.querySelectorAll('.rating__star');
+let selectedRating = 0;
 
-        ratingStars.forEach(star => {
-            star.addEventListener('click', () => {
-                selectedRating = parseInt(star.getAttribute('data-rating'));
-                ratingStars.forEach(s => s.classList.remove('selected'));
-                for (let i = 0; i < selectedRating; i++) {
-                    ratingStars[i].classList.add('selected');
-                }
-            });
-        });
+ratingStars.forEach(star => {
+    star.addEventListener('click', () => {
+        selectedRating = parseInt(star.getAttribute('data-rating'));
+        ratingStars.forEach(s => s.classList.remove('selected'));
+        for (let i = 0; i < selectedRating; i++) {
+            ratingStars[i].classList.add('selected');
+        }
+    });
+});
 
-        reviewForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+reviewForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-            const authorInput = document.querySelector('.review-author');
-            const textInput = document.querySelector('.review-text');
+const authorInput = document.querySelector('.review-author');
+const textInput = document.querySelector('.review-text');
+const success = await saveReviewToServer(attraction.id, newReview);
 
-            if (!authorInput.value.trim()) {
-                alert('Введите ваше имя');
-                return;
-            }
+if (success) {
+    const reviewElement = createReviewElement(newReview, attraction.id);
+    reviewsContainer.appendChild(reviewElement);
 
-            if (!textInput.value.trim()) {
-                alert('Введите текст отзыва');
-                return;
-            }
+    authorInput.value = '';
+    textInput.value = '';
+    ratingStars.forEach(s => s.classList.remove('selected'));
+    selectedRating = 0;
 
-            if (selectedRating === 0) {
-                alert('Выберите оценку');
-                return;
-            }
+    const updatedReviews = await fetchReviewsFromServer(attraction.id);
+    renderReviews(reviewsContainer, updatedReviews, attraction.id);
+} else {
+    alert('Ошибка добавлении отзыва');
+}
+});
 
-            const newReview = {
-                author: authorInput.value.trim(),
-                text: textInput.value.trim(),
-                rating: selectedRating,
-            };
+const galleryItems = document.querySelectorAll('.modal__gallery-item');
+const fullscreenGallery = document.querySelector('.fullscreen-gallery');
+const fullscreenImage = document.querySelector('.fullscreen-gallery__image');
+const closeFullscreen = document.querySelector('.fullscreen-gallery__close');
+const prevButton = document.querySelector('.fullscreen-gallery__prev');
+const nextButton = document.querySelector('.fullscreen-gallery__next');
+const miniImgContainer = document.querySelector('.fullscreen-gallery__mini');
+let currentImageIndex = 0;
 
-            const success = await saveReviewToServer(attraction.id, newReview);
+// Создаем миниатюры
+attraction.images.forEach((img, index) => {
+    const thumbnail = document.createElement('img');
+    thumbnail.src = img;
+    thumbnail.classList.add('fullscreen-gallery__mini');
+    thumbnail.addEventListener('click', () => {
+        currentImageIndex = index;
+        fullscreenImage.src = img;
+        updateThumbnails();
+    });
+    miniImgContainer.appendChild(thumbnail);
+});
 
-            if (success) {
-                const reviewElement = createReviewElement(newReview, attraction.id);
-                reviewsContainer.appendChild(reviewElement);
+galleryItems.forEach((item, index) => {
+    item.addEventListener('click', () => {
+        currentImageIndex = index;
+        fullscreenImage.src = item.src;
+        fullscreenGallery.style.display = 'flex';
+        updateThumbnails();
+    });
+});
 
-                authorInput.value = '';
-                textInput.value = '';
-                ratingStars.forEach(s => s.classList.remove('selected'));
-                selectedRating = 0;
+closeFullscreen.addEventListener('click', () => {
+    fullscreenGallery.style.display = 'none';
+});
 
-                const updatedReviews = await fetchReviewsFromServer(attraction.id);
-                renderReviews(reviewsContainer, updatedReviews, attraction.id);
-            } else {
-                alert('Ошибка добавлении отзыва');
-            }
-        });
+prevButton.addEventListener('click', () => {
+    currentImageIndex = (currentImageIndex - 1 + attraction.images.length) % attraction.images.length;
+    fullscreenImage.src = attraction.images[currentImageIndex];
+    updateThumbnails();
+});
 
-        const galleryItems = document.querySelectorAll('.modal__gallery-item');
-        const fullscreenGallery = document.querySelector('.fullscreen-gallery');
-        const fullscreenImage = document.querySelector('.fullscreen-gallery__image');
-        const closeFullscreen = document.querySelector('.fullscreen-gallery__close');
-        const prevButton = document.querySelector('.fullscreen-gallery__prev');
-        const nextButton = document.querySelector('.fullscreen-gallery__next');
-        let currentImageIndex = 0;
+nextButton.addEventListener('click', () => {
+    currentImageIndex = (currentImageIndex + 1) % attraction.images.length;
+    fullscreenImage.src = attraction.images[currentImageIndex];
+    updateThumbnails();
+});
 
-        galleryItems.forEach((item, index) => {
-            item.addEventListener('click', () => {
-                currentImageIndex = index;
-                fullscreenImage.src = item.src;
-                fullscreenGallery.style.display = 'flex';
-            });
-        });
-
-        closeFullscreen.addEventListener('click', () => {
-            fullscreenGallery.style.display = 'none';
-        });
-
-        prevButton.addEventListener('click', () => {
-            currentImageIndex = (currentImageIndex - 1 + attraction.images.length) % attraction.images.length;
-            fullscreenImage.src = attraction.images[currentImageIndex];
-        });
-
-        nextButton.addEventListener('click', () => {
-            currentImageIndex = (currentImageIndex + 1) % attraction.images.length;
-            fullscreenImage.src = attraction.images[currentImageIndex];
-        });
+function updateThumbnails() {
+    const thumbnails = document.querySelectorAll('.fullscreen-gallery__mini');
+    thumbnails.forEach((thumbnail, index) => {
+        if (index === currentImageIndex) {
+            thumbnail.classList.add('active');
+        } else {
+            thumbnail.classList.remove('active');
+        }
+    });
     }
+}
 }
 
 function createReviewElement(review, attractionId) {
